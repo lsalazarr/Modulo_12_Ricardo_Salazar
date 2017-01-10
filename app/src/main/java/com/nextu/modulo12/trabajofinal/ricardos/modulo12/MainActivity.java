@@ -5,6 +5,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.net.Uri;
+import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Base64;
@@ -17,8 +18,11 @@ import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
+import com.facebook.Profile;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.doubleclick.PublisherAdRequest;
 import com.google.android.gms.ads.doubleclick.PublisherAdView;
 
@@ -34,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private CallbackManager cM;
     private LoginButton lB;
     private PublisherAdView publisherAdView;
-    String nombre,email,foto;
+    String nombre,foto;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,37 +65,14 @@ public class MainActivity extends AppCompatActivity {
             public void onSuccess(LoginResult loginResult) {
 
                 Toast.makeText(MainActivity.this, "¡Inicio de sesión exitoso!", Toast.LENGTH_LONG).show();
-
-                GraphRequest request = GraphRequest.newMeRequest(
-                        loginResult.getAccessToken(),
-                        new GraphRequest.GraphJSONObjectCallback() {
-                            @Override
-                            public void onCompleted(
-                                    JSONObject object,
-                                    GraphResponse response) {
-                                Log.v("LoginActivity Response ", response.toString());
-
-                                try {
-                                    nombre = object.getString("name");
-
-                                    email = object.getString("email");
-                                    foto =  object.getString("public_profile");
-                                    Intent intent = new Intent(MainActivity.this,segunda_Pantalla.class);
-                                    intent.putExtra("email",email);
-                                    intent.putExtra("foto",foto);
-                                    intent.putExtra("nombre",nombre);
-                                    startActivity(intent);
-
-
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        });
-                Bundle parameters = new Bundle();
-                parameters.putString("fields", "id,name,email,gender, birthday,public_profile");
-                request.setParameters(parameters);
-                request.executeAsync();
+                Profile profile = Profile.getCurrentProfile();
+                nombre = profile.getFirstName() +" " +profile.getMiddleName() + " " +profile.getLastName();
+                foto = profile.getId().toString();
+                LoginManager.getInstance().logOut();
+                Intent intent = new Intent(MainActivity.this,segunda_Pantalla.class);
+                intent.putExtra("nombre",nombre);
+                intent.putExtra("id",foto);
+                startActivity(intent);
 
 
             }
