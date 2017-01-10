@@ -33,6 +33,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
+
 public class MainActivity extends AppCompatActivity {
 
     private CallbackManager cM;
@@ -140,5 +142,22 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
     }
 
+
+    @Override
+    public void onBackPressed() {
+        new SweetAlertDialog(MainActivity.this, SweetAlertDialog.WARNING_TYPE)
+                .setTitleText("Quiere Salir")
+                .setContentText("Usted saldra de la aplicación")
+                .setCancelText("No")
+                .setConfirmText("Si")
+                .showCancelButton(true)
+                .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sweetAlertDialog) {
+                        MainActivity.this.finish();
+                    }
+                })
+                .show();
+    }
 
 }
