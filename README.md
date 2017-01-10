@@ -1,0 +1,1 @@
+La ruta para probar la aplicacion es : Modulo_12_Ricardo_Salazar\app\build\outputs\apk\
