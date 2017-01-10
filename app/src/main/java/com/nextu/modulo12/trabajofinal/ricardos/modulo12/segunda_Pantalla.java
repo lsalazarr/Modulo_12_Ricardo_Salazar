@@ -22,14 +22,11 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class segunda_Pantalla extends AppCompatActivity {
 
     CircleImageView imageView;
-    private InterstitialAd interstitialAd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_segunda__pantalla);
-        interstitialAd = new InterstitialAd(this);
-        interstitialAd.setAdUnitId(getString(R.string.id_publicidad));
         imageView = (CircleImageView) findViewById(R.id.profile_image);
         String userID= getIntent().getStringExtra("id");
 
@@ -39,39 +36,10 @@ public class segunda_Pantalla extends AppCompatActivity {
                 into(imageView);
         ((TextView) findViewById(R.id.nombre)).setText(getIntent().getStringExtra("nombre"));
 
-        new Handler().postDelayed(new Runnable(){
-            @Override
-            public void run() {
-                verPublicidad();
-            }
-        }, 4000);
+
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        iniciar();
-    }
-
-    //metodo que permite iniciar la publicidad y cargar admob
-    private void iniciar() {
-        AdRequest adRequest = new AdRequest.Builder().build();
-        interstitialAd.loadAd(adRequest);
-    }
-    //metodo que permite cargar la publicidad
-    private void verPublicidad() {
-        if(interstitialAd != null && interstitialAd.isLoaded()){
-            interstitialAd.show();
-        }else {
-            Toast.makeText(this, "No se cargo la Publicidad", Toast.LENGTH_SHORT).show();
-            iniciar();
-        }
-    }
 
     @Override
     public void onBackPressed() {

@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         FacebookSdk.sdkInitialize(getApplicationContext());
         cM = CallbackManager.Factory.create();
 
-        getFbKeyHash("2SUkDCEM6T/vKAAmolnu5Vbcpbg=");
+        getFbKeyHash("MM9z2Aq7sfQd/R0/3dv+pgEUfSQ=");
 
         setContentView(R.layout.activity_main);
         publisherAdView = (PublisherAdView) findViewById(R.id.ad_view);
@@ -155,6 +155,10 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(SweetAlertDialog sweetAlertDialog) {
                         MainActivity.this.finish();
+                        Intent intent = new Intent(Intent.ACTION_MAIN);
+                        intent.addCategory(Intent.CATEGORY_HOME);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
                     }
                 })
                 .show();
