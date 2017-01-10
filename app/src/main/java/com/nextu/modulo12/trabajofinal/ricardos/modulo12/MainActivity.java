@@ -37,6 +37,8 @@ import cn.pedant.SweetAlert.SweetAlertDialog;
 
 public class MainActivity extends AppCompatActivity {
 
+    //para probar esta app instale la apk que se encuentra en esta ubicacion Modulo_12_Ricardo_Salazar\app\build\outputs\apk\
+
     private CallbackManager cM;
     private LoginButton lB;
     private PublisherAdView publisherAdView;
