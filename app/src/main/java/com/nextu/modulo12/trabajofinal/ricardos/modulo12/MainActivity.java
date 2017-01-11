@@ -24,6 +24,7 @@ import com.facebook.ProfileTracker;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.doubleclick.PublisherAdRequest;
 import com.google.android.gms.ads.doubleclick.PublisherAdView;
@@ -44,7 +45,6 @@ public class MainActivity extends AppCompatActivity {
     private CallbackManager cM;
     private LoginButton lB;
     private PublisherAdView publisherAdView;
-    private ProfileTracker mProfileTracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,30 +62,56 @@ public class MainActivity extends AppCompatActivity {
         PublisherAdRequest adRequest = new PublisherAdRequest.Builder().build();
         publisherAdView.loadAd(adRequest);
         lB = (LoginButton)findViewById(R.id.login_facebook);
+        lB.setReadPermissions(Arrays.asList(
+                "public_profile", "email", "user_birthday", "user_friends"));
 
         lB.registerCallback(cM, new FacebookCallback<LoginResult>() {
+
+            private ProfileTracker mProfileTracker;
+
             @Override
             public void onSuccess(final LoginResult loginResult) {
 
                 LoginManager.getInstance().logOut();
+                String name="";
+                String id = "";
+                if(Profile.getCurrentProfile()==null){
+                    mProfileTracker = new ProfileTracker() {
+                        @Override
+                        protected void onCurrentProfileChanged(Profile profile, Profile profile2) {
+                            // profile2 is the new profile
+                            String name= profile2.getName() + " " + profile2.getLastName();
+                            String id = profile2.getId();
+                            Intent intent = new Intent(MainActivity.this,segunda_Pantalla.class);
+                            intent.putExtra("nombre",name);
+                            intent.putExtra("id",id);
+                            startActivity(intent);
+                            mProfileTracker.stopTracking();
+                        }
+                    };
+                }else{
+                    Profile profile= Profile.getCurrentProfile();
+                    name= profile.getName() + " " + profile.getLastName();
+                    id = profile.getId();
+                    Intent intent = new Intent(MainActivity.this,segunda_Pantalla.class);
+                    intent.putExtra("nombre",name);
+                    intent.putExtra("id",id);
+                    startActivity(intent);
+                }
                 GraphRequest request = GraphRequest.newMeRequest(loginResult.getAccessToken(),
                         new GraphRequest.GraphJSONObjectCallback() {
                             @Override
                             public void onCompleted(JSONObject object, GraphResponse response) {
                                 try {
 
-                                    String name = object.getString("name");
-                                    String email = object.getString("email");
-                                    String id = object.getString("id");
 
+
+                                    String email = object.getString("email");
+                                    //intent.putExtra("email", email);
                                     //Toast.makeText(MainActivity.this, name + " " + " " + email + " " + id, Toast.LENGTH_SHORT).show();
 
 
-                                    Intent intent = new Intent(MainActivity.this,segunda_Pantalla.class);
-                                    intent.putExtra("nombre",name);
-                                    intent.putExtra("id",id);
-                                    intent.putExtra("email", email);
-                                    startActivity(intent);
+
 
 
                                 } catch (JSONException ex) {
@@ -138,8 +164,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
-    protected void onActivityResult(int reqCode, int resCode, Intent i){
-        cM.onActivityResult(reqCode, resCode, i);
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        // if you don't add following block,
+        // your registered `FacebookCallback` won't be called
+        if (cM.onActivityResult(requestCode, resultCode, data)) {
+            return;
+        }
     }
 
     @Override
