@@ -12,6 +12,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -19,6 +20,7 @@ import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.Profile;
+import com.facebook.ProfileTracker;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
@@ -42,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private CallbackManager cM;
     private LoginButton lB;
     private PublisherAdView publisherAdView;
-    String nombre,foto;
+    private ProfileTracker mProfileTracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,22 +63,42 @@ public class MainActivity extends AppCompatActivity {
         publisherAdView.loadAd(adRequest);
         lB = (LoginButton)findViewById(R.id.login_facebook);
 
-        lB.setReadPermissions(Arrays.asList(
-                "public_profile", "email", "user_birthday", "user_friends"));
-
         lB.registerCallback(cM, new FacebookCallback<LoginResult>() {
             @Override
-            public void onSuccess(LoginResult loginResult) {
+            public void onSuccess(final LoginResult loginResult) {
 
-                Toast.makeText(MainActivity.this, "¡Inicio de sesión exitoso!", Toast.LENGTH_LONG).show();
-                Profile profile = Profile.getCurrentProfile();
-                nombre = profile.getFirstName() +" " +profile.getMiddleName() + " " +profile.getLastName();
-                foto = profile.getId().toString();
                 LoginManager.getInstance().logOut();
-                Intent intent = new Intent(MainActivity.this,segunda_Pantalla.class);
-                intent.putExtra("nombre",nombre);
-                intent.putExtra("id",foto);
-                startActivity(intent);
+                GraphRequest request = GraphRequest.newMeRequest(loginResult.getAccessToken(),
+                        new GraphRequest.GraphJSONObjectCallback() {
+                            @Override
+                            public void onCompleted(JSONObject object, GraphResponse response) {
+                                try {
+
+                                    String name = object.getString("name");
+                                    String email = object.getString("email");
+                                    String id = object.getString("id");
+
+                                    //Toast.makeText(MainActivity.this, name + " " + " " + email + " " + id, Toast.LENGTH_SHORT).show();
+
+
+                                    Intent intent = new Intent(MainActivity.this,segunda_Pantalla.class);
+                                    intent.putExtra("nombre",name);
+                                    intent.putExtra("id",id);
+                                    intent.putExtra("email", email);
+                                    startActivity(intent);
+
+
+                                } catch (JSONException ex) {
+                                    ex.printStackTrace();
+                                }
+                            }
+                        });
+                Bundle parameters = new Bundle();
+                parameters.putString("fields", "id,name,email,gender, birthday");
+                request.setParameters(parameters);
+                request.executeAsync();
+                Toast.makeText(MainActivity.this, "¡Inicio de sesión exitoso!", Toast.LENGTH_LONG).show();
+
 
 
             }
