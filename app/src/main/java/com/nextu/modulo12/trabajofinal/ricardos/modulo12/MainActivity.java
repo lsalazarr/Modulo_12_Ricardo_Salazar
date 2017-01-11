@@ -73,56 +73,67 @@ public class MainActivity extends AppCompatActivity {
             public void onSuccess(final LoginResult loginResult) {
 
                 LoginManager.getInstance().logOut();
-                String name="";
-                String id = "";
                 if(Profile.getCurrentProfile()==null){
                     mProfileTracker = new ProfileTracker() {
                         @Override
                         protected void onCurrentProfileChanged(Profile profile, Profile profile2) {
                             // profile2 is the new profile
-                            String name= profile2.getName() + " " + profile2.getLastName();
-                            String id = profile2.getId();
-                            Intent intent = new Intent(MainActivity.this,segunda_Pantalla.class);
-                            intent.putExtra("nombre",name);
-                            intent.putExtra("id",id);
-                            startActivity(intent);
+                            final String name= profile2.getName() + " " + profile2.getLastName();
+                            final String id = profile2.getId();
+
+
                             mProfileTracker.stopTracking();
+                            GraphRequest request = GraphRequest.newMeRequest(loginResult.getAccessToken(),
+                                    new GraphRequest.GraphJSONObjectCallback() {
+                                        @Override
+                                        public void onCompleted(JSONObject object, GraphResponse response) {
+                                            try {
+
+                                                Intent intent = new Intent(MainActivity.this,segunda_Pantalla.class);
+                                                intent.putExtra("nombre",name);
+                                                intent.putExtra("id",id);
+                                                intent.putExtra("email", object.getString("email"));
+                                                startActivity(intent);
+                                                //Toast.makeText(MainActivity.this, name + " " + " " + object.getString("email") + " " + id, Toast.LENGTH_SHORT).show();
+                                            } catch (JSONException ex) {
+                                                ex.printStackTrace();
+                                            }
+                                        }
+                                    });
+                            Bundle parameters = new Bundle();
+                            parameters.putString("fields", "id,name,email,gender, birthday");
+                            request.setParameters(parameters);
+                            request.executeAsync();
                         }
                     };
                 }else{
                     Profile profile= Profile.getCurrentProfile();
-                    name= profile.getName() + " " + profile.getLastName();
-                    id = profile.getId();
-                    Intent intent = new Intent(MainActivity.this,segunda_Pantalla.class);
-                    intent.putExtra("nombre",name);
-                    intent.putExtra("id",id);
-                    startActivity(intent);
-                }
-                GraphRequest request = GraphRequest.newMeRequest(loginResult.getAccessToken(),
-                        new GraphRequest.GraphJSONObjectCallback() {
-                            @Override
-                            public void onCompleted(JSONObject object, GraphResponse response) {
-                                try {
+                    final String  name= profile.getName() + " " + profile.getLastName();
+                    final String id = profile.getId();
 
-
-
-                                    String email = object.getString("email");
-                                    //intent.putExtra("email", email);
-                                    //Toast.makeText(MainActivity.this, name + " " + " " + email + " " + id, Toast.LENGTH_SHORT).show();
-
-
-
-
-
-                                } catch (JSONException ex) {
-                                    ex.printStackTrace();
+                    GraphRequest request = GraphRequest.newMeRequest(loginResult.getAccessToken(),
+                            new GraphRequest.GraphJSONObjectCallback() {
+                                @Override
+                                public void onCompleted(JSONObject object, GraphResponse response) {
+                                    try {
+                                        String name = object.getString("name");
+                                        Intent intent = new Intent(MainActivity.this,segunda_Pantalla.class);
+                                        intent.putExtra("nombre",name);
+                                        intent.putExtra("id",id);
+                                        intent.putExtra("email", object.getString("email"));
+                                        startActivity(intent);
+                                        //Toast.makeText(MainActivity.this, name + " " + " " + object.getString("email") + " " + id, Toast.LENGTH_SHORT).show();
+                                    } catch (JSONException ex) {
+                                        ex.printStackTrace();
+                                    }
                                 }
-                            }
-                        });
-                Bundle parameters = new Bundle();
-                parameters.putString("fields", "id,name,email,gender, birthday");
-                request.setParameters(parameters);
-                request.executeAsync();
+                            });
+                    Bundle parameters = new Bundle();
+                    parameters.putString("fields", "id,name,email,gender, birthday");
+                    request.setParameters(parameters);
+                    request.executeAsync();
+                }
+
                 Toast.makeText(MainActivity.this, "¡Inicio de sesión exitoso!", Toast.LENGTH_LONG).show();
 
 
